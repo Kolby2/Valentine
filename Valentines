@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Valentine?</title>
+  <style>
+    :root {
+      --bg1: #fff5f7;
+      --bg2: #ffe4ec;
+      --text: #1f2937;
+      --yes: #22c55e;
+      --yesHover: #16a34a;
+      --no: #ef4444;
+      --card: rgba(255,255,255,0.8);
+      --shadow: 0 20px 60px rgba(0,0,0,0.12);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, var(--bg1), var(--bg2));
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .card {
+      width: min(560px, 92vw);
+      padding: 36px 28px;
+      border-radius: 24px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0 0 22px;
+      opacity: 0.8;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #yesBtn {
+      background: var(--yes);
+      color: white;
+    }
+    #yesBtn:hover {
+      background: var(--yesHover);
+      transform: translateY(-1px);
+    }
+    #yesBtn:active {
+      transform: translateY(0px) scale(0.99);
+    }
+
+    /* "No" starts small and is positioned absolutely so it can run away */
+    #noBtn {
+      background: var(--no);
+      color: white;
+      padding: 10px 14px;
+      font-size: 13px;
+      border-radius: 12px;
+
+      position: absolute;
+      left: 50%;
+      top: 72%;
+      transform: translate(-50%, -50%);
+    }
+
+    .result {
+      margin-top: 18px;
+      font-size: 18px;
+      font-weight: 700;
+      min-height: 24px;
+    }
+
+    /* Optional: small floating hearts background (easy to remove later) */
+    .heart {
+      position: absolute;
+      font-size: 18px;
+      opacity: 0.12;
+      animation: floatUp linear forwards;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-120vh); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <h1>Will you be my valentine? 💘</h1>
+    <p>Be honest… (but also choose wisely)</p>
+
+    <div class="buttons">
+      <button id="yesBtn">Yes</button>
+      <!-- "No" is positioned absolutely and will dodge the cursor -->
+      <button id="noBtn" aria-label="No">No</button>
+    </div>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const card = document.getElementById("card");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const result = document.getElementById("result");
+
+    // ---- YES behavior ----
+    yesBtn.addEventListener("click", () => {
+      result.textContent = "YAY!! 💖🥳";
+      // You can swap this for gifs later (we’ll do it when you're ready)
+      burstHearts(18);
+    });
+
+    // ---- NO button dodge behavior ----
+    // Move the "No" button to a random spot within the card boundaries
+    function moveNoButton() {
+      const cardRect = card.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      // Padding so the button doesn't clip outside the card
+      const padding = 14;
+
+      const minX = padding;
+      const maxX = cardRect.width - btnRect.width - padding;
+      const minY = padding + 56; // avoid the title area
+      const maxY = cardRect.height - btnRect.height - padding;
+
+      const x = rand(minX, Math.max(minX, maxX));
+      const y = rand(minY, Math.max(minY, maxY));
+
+      // Place relative to card (since card is position: relative)
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top = `${y}px`;
+      noBtn.style.transform = `translate(0, 0)`;
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Desktop: mouse tries to hover -> move away
+    noBtn.addEventListener("mouseenter", moveNoButton);
+
+    // Mobile: tapping near it should also cause it to move
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      moveNoButton();
+    }, { passive: false });
+
+    // Optional: if they somehow click NO, still be playful
+    noBtn.addEventListener("click", () => {
+      result.textContent = "Nice try 😅";
+      moveNoButton();
+    });
+
+    // ---- Optional tiny heart burst effect (no external files) ----
+    function burstHearts(count = 12) {
+      const cardRect = card.getBoundingClientRect();
+      for (let i = 0; i < count; i++) {
+        const h = document.createElement("div");
+        h.className = "heart";
+        h.textContent = ["💗","💖","💘","💞","💕"][rand(0,4)];
+        h.style.left = rand(0, Math.floor(cardRect.width)) + "px";
+        h.style.top = rand(Math.floor(cardRect.height * 0.4), Math.floor(cardRect.height)) + "px";
+        h.style.animationDuration = rand(1800, 3400) + "ms";
+        card.appendChild(h);
+        setTimeout(() => h.remove(), 4000);
+      }
+    }
+
+    // Start with the No button in a sensible spot
+    // (so it doesn't overlap on first load on different screen sizes)
+    window.addEventListener("load", () => {
+      // put it under the button row initially
+      noBtn.style.left = "50%";
+      noBtn.style.top = "72%";
+      noBtn.style.transform = "translate(-50%, -50%)";
+    });
+
+    // If the window resizes, keep it inside the card next time it moves
+    window.addEventListener("resize", () => {
+      // no-op; moveNoButton uses fresh measurements
+    });
+  </script>
+</body>
+</html>

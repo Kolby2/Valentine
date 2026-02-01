@@ -120,8 +120,8 @@
 </head>
 <body>
   <div class="card" id="card">
-    <h1>Will you be my valentine? 💘</h1>
-    <p>Be honest… (but also choose wisely)</p>
+    <h1>Anesu, will you be my valentine? 💘</h1>
+    
 
     <div class="buttons">
       <button id="yesBtn">Yes</button>
@@ -139,11 +139,17 @@
     const result = document.getElementById("result");
 
     // ---- YES behavior ----
-    yesBtn.addEventListener("click", () => {
-      result.textContent = "YAY!! 💖🥳";
-      // You can swap this for gifs later (we’ll do it when you're ready)
-      burstHearts(18);
-    });
+   yesBtn.addEventListener("click", () => {
+  result.innerHTML = `
+    <p style="font-size:20px; font-weight:700;">
+      A surprise is waiting for you when you get to NYC 😏😘
+    </p>
+    <img src="https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif" 
+         style="width:220px; border-radius:12px; margin-top:10px;">
+  `;
+  burstHearts(25);
+});
+
 
     // ---- NO button dodge behavior ----
     // Move the "No" button to a random spot within the card boundaries
